@@ -17,12 +17,15 @@ async def index(req: Request):
         "framework": "Robyn",
         "templating_engine": "Jinja2"
     }
-    return jinja_template.render_template('index.html', **context)
+    return jinja_template.render_template('index.html.jinja', **context)
 
 # TODO: Complete logic to process uploaded image
 @app.post("/prediction")
 async def predict(req: Request):
-    image = img.open(io.BytesIO(req.body))
+    form = await req.form()
+    image_file = form["image"]
+
+    image = img.open(io.BytesIO(image_file.body))
 
 if __name__ == "__main__":
     if os.path.exists('model.pth'):

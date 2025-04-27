@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torchvision.io as tv_io
+import torchvision.transforms.functional as F
 import torchvision.transforms.v2 as transforms
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
@@ -90,6 +91,34 @@ def predict_letter(model, file_path):
     image = image.unsqueeze(0)
     # Send image to correct device
     image = image.to(device)
+    # Make prediction
+    output = model(image)
+    # Find max index
+    prediction = output.argmax(dim=1).item()
+    # Convert prediction to letter
+    predicted_letter = alphabet[prediction]
+    # Return prediction
+    return predicted_letter
+
+def predict_from_image(model, image):
+    IMG_WIDTH = 28
+    IMG_HEIGHT = 28
+
+    alphabet = "abcdefghiklmnopqrstuvwxy"
+
+    preprocess_trans = transforms.Compose([
+        transforms.ToDtype(torch.float32, scale=True), # Converts [0, 255] to [0, 1]
+        transforms.Resize((IMG_WIDTH, IMG_HEIGHT)),
+        transforms.Grayscale()  # From Color to Gray
+    ])
+
+    image_tensor = F.pil_to_tensor(image)
+
+    image_tensor = preprocess_trans(image_tensor)
+
+    image_tensor = image_tensor.unsqueeze(0)
+
+    image_tensor = image_tensor.to(device)
     # Make prediction
     output = model(image)
     # Find max index
