@@ -2,19 +2,21 @@
 <!DOCTYPE HTML>
 <html lang="en">
     <head>
+        <meta description="POC webUI">
         <meta charset="UTF-8">
         <title>ASL_CNN WebUI</title>
     </head>
     <body>
-        <h1>Upload image</h1>
+        <h1>Convolutional Neural Network to predict sign language</h1>
 
+        <h2>Upload an image</h2>
         <form method="post" action="/prediction" enctype="multipart/form-data">
             <input type="file" name="image" accept="image/*" required>
             <button type="submit">Upload</button>
         </form>
 
         {% if result %}
-            <h2>Processing...</h2>\
+            <h2>Predicted letter:</h2>
             <p>{{ result }}</p>
         {% endif %}
     </body>

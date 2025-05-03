@@ -14,7 +14,7 @@ IMG_HEIGHT = 28
 IMG_WIDTH = 28
 IMG_CHS = 1
 N_CLASSES = 24
-
+# TODO: Cleanup
 class MyDataset(Dataset):
     def __init__(self, base_df):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

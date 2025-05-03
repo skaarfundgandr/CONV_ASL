@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
 import asl
-
+# TODO: Cleanup source
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class ConvNN(nn.Module):
@@ -107,20 +107,19 @@ def predict_from_image(model, image):
     alphabet = "abcdefghiklmnopqrstuvwxy"
 
     preprocess_trans = transforms.Compose([
+        transforms.ToImage(), # Converts PIL image to tensor
         transforms.ToDtype(torch.float32, scale=True), # Converts [0, 255] to [0, 1]
         transforms.Resize((IMG_WIDTH, IMG_HEIGHT)),
         transforms.Grayscale()  # From Color to Gray
     ])
 
-    image_tensor = F.pil_to_tensor(image)
-
-    image_tensor = preprocess_trans(image_tensor)
+    image_tensor = preprocess_trans(image)
 
     image_tensor = image_tensor.unsqueeze(0)
 
     image_tensor = image_tensor.to(device)
     # Make prediction
-    output = model(image)
+    output = model(image_tensor)
     # Find max index
     prediction = output.argmax(dim=1).item()
     # Convert prediction to letter
