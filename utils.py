@@ -5,9 +5,12 @@ import numpy as np
 import torchvision.transforms.v2 as transforms
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+import cv2
+import mediapipe as mp
+from PIL import Image
 
 import asl
-# TODO: Cleanup source
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class ConvNN(nn.Module):
@@ -112,8 +115,12 @@ def predict_from_image(model, image):
         transforms.Resize((IMG_WIDTH, IMG_HEIGHT)),
         transforms.Grayscale()  # From Color to Gray
     ])
-
-    image_tensor = preprocess_trans(image)
+    try:
+        cropped_image = crop_to_hand(image)
+        image_tensor = preprocess_trans(cropped_image)
+    except ValueError as v:
+        print(v)
+        image_tensor = preprocess_trans(image)
 
     image_tensor = image_tensor.unsqueeze(0)
 
@@ -126,3 +133,33 @@ def predict_from_image(model, image):
     predicted_letter = alphabet[prediction]
     # Return prediction
     return predicted_letter
+
+def crop_to_hand(image, padding = 60):
+    mp_hands = mp.solutions.hands
+    
+    cv_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+    source_img = cv_image.copy()
+    height, width = cv_image.shape[:2]
+    
+    with mp_hands.Hands(static_image_mode=True,
+                  max_num_hands=1,
+                  min_detection_confidence=0.5) as hands:
+        results = hands.process(cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB))
+        if not results.multi_hand_landmarks:
+            raise ValueError("No hand detected!")
+        
+        landmark = results.multi_hand_landmarks[0].landmark
+        xs = [int(pt.x * width) for pt in landmark]
+        ys = [int(pt.y * height) for pt in landmark]
+    
+    x0 = max(min(xs) - padding, 0)
+    y0 = max(min(ys) - padding, 0)
+    x1 = min(max(xs) + padding, width)
+    y1 = min(max(ys) + padding, height)
+    cropped_cv = source_img[y0:y1, x0:x1]
+    
+    cropped_rgb = cv2.cvtColor(cropped_cv, cv2.COLOR_BGR2RGB)
+    
+    cropped_img = Image.fromarray(cropped_rgb)
+    
+    return cropped_img
