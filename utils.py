@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torchvision.io as tv_io
-import torchvision.transforms.functional as F
+import numpy as np
 import torchvision.transforms.v2 as transforms
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg

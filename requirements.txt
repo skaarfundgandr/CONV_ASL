@@ -1,5 +1,7 @@
 torch
 torchvision
+numpy
 pandas
 matplotlib
 robyn
+opencv-contrib-python

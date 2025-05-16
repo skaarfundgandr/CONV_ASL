@@ -6,6 +6,8 @@ import torchvision.transforms.v2 as transforms
 import pandas as pd
 
 import utils
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # Dataset
 train_df = pd.read_csv("data/train.csv")
 valid_df = pd.read_csv("data/valid.csv")
@@ -17,7 +19,6 @@ N_CLASSES = 24
 # TODO: Cleanup
 class MyDataset(Dataset):
     def __init__(self, base_df):
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         x_df = base_df.copy()
         y_df = x_df.pop("label")
         x_df = x_df.values / 255
@@ -34,8 +35,6 @@ class MyDataset(Dataset):
         return len(self.xs)
 # Trains and exports the model
 def train_model(export=True, epochs=20):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
     n = 32 # Number of batches
     train_data = MyDataset(train_df)
     train_loader = DataLoader(train_data, batch_size=n, shuffle=True)
